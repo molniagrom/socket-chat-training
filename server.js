@@ -43,6 +43,8 @@ io.on('connection', (socket) => {
     socket.emit('initial-messages', messages);
 
     socket.on('client-message-sent', (message) => {
+        // Добавляем новое сообщение в массив на сервере
+        messages.push(message);
         // Пересылаем сообщение всем подключенным клиентам, включая отправителя
         io.emit('server-message-sent', message);
     });
