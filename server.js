@@ -38,15 +38,43 @@ const io = new Server(server, {
     }
 });
 
-io.on('connection', (socket) => {
-    // Отправляем историю сообщений новому пользователю
-    socket.emit('initial-messages', messages);
+const usersState = new Map()
 
-    socket.on('client-message-sent', (message) => {
-        // Добавляем новое сообщение в массив на сервере
-        messages.push(message);
+io.on('connection', (socketChannel) => {
+
+    usersState.set(socketChannel, {id: new Date().getTime().toString(), name: "anonym"})
+
+    socketChannel.on('disconnect', () => {
+        usersState.delete(socketChannel);
+    })
+
+    socketChannel.on("client-name-sent", (name) => {
+        if (typeof name !== "string") {
+            return
+        }
+        const user = usersState.get(socketChannel)
+        user.name = name
+    })
+
+    // Отправляем историю сообщений новому пользователю
+    socketChannel.emit('initial-messages', messages);
+
+    socketChannel.on('client-message-sent', (newMessage) => {
+       if (typeof newMessage !== "string") {
+           return
+       }
+
+        const user = usersState.get(socketChannel)
+
+        const messageToSend = {
+            id: new Date().getTime().toString(),
+            message: newMessage,
+            user: {id: user.id || 'unknown', name: user.name}
+        };
+
+        messages.push(messageToSend);
         // Пересылаем сообщение всем подключенным клиентам, включая отправителя
-        io.emit('new-message-sent', message);
+        io.emit('new-message-sent', messageToSend);
     });
 
 });

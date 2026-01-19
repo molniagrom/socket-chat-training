@@ -19,10 +19,12 @@ type MessageType = {
 
 // Подключаемся к нашему локальному серверу
 const socket: Socket = io("http://localhost:3001");
+
 // const socket: Socket = io("https://my-socket-chat-training-server.onrender.com");
 
 function App() {
     const [messages, setMessages] = useState<MessageType[]>([]);
+    const [name, setName] = useState("Alina");
     const [newMessage, setNewMessage] = useState('');
 
     useEffect(() => {
@@ -50,14 +52,9 @@ function App() {
 
     const sendMessage = () => {
         if (newMessage.trim() !== '') {
-            const messageToSend = {
-                id: new Date().getTime().toString(),
-                message: newMessage,
-                user: {id: socket.id || 'unknown', name: 'You'}
-            };
-            
+
             // Отправляем событие 'client-message-sent' на сервер
-            socket.emit('client-message-sent', messageToSend);
+            socket.emit('client-message-sent', newMessage);
             setNewMessage('');
         } else {
             console.log('Empty message, not sending');
@@ -78,6 +75,19 @@ function App() {
                         )
                     })}
                 </div>
+                <br/>
+                <div className={"inputButton"}>
+                    <input
+                        type="text"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                    />
+                    <button onClick={() => {
+                        socket.emit('client-name-sent', name)
+                    }}>send name
+                    </button>
+                </div>
+                <br/>
                 <div className={"inputButton"}>
                     <textarea
                         className={"textarea"}
