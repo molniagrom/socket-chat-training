@@ -46,12 +46,13 @@ io.on('connection', (socket) => {
         // Добавляем новое сообщение в массив на сервере
         messages.push(message);
         // Пересылаем сообщение всем подключенным клиентам, включая отправителя
-        io.emit('server-message-sent', message);
+        io.emit('new-message-sent', message);
     });
 
 });
 
-const PORT = 3001; // Выбираем порт для сервера
+// Используем порт, предоставленный хостингом, или 3001 для локальной разработки
+const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {
-    console.log(`Socket.IO server running at http://localhost:${PORT}/`);
+    console.log(`Server is running on port ${PORT}`);
 });

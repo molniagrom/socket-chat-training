@@ -14,8 +14,12 @@ type MessageType = {
     user: UserType;
 }
 
+// https://my-socket-chat-training-server.onrender.com/
+// Общедоступный сервер
+
 // Подключаемся к нашему локальному серверу
 const socket: Socket = io("http://localhost:3001");
+// const socket: Socket = io("https://my-socket-chat-training-server.onrender.com");
 
 function App() {
     const [messages, setMessages] = useState<MessageType[]>([]);
@@ -27,7 +31,7 @@ function App() {
         const messageListener = (message: MessageType) => {
             setMessages((prevMessages) => [...prevMessages, message]);
         };
-        socket.on('server-message-sent', messageListener);
+        socket.on('new-message-sent', messageListener);
 
         const initialMessagesListener = (messages: MessageType[]) => {
             setMessages(messages);
@@ -37,7 +41,7 @@ function App() {
         // Очистка при размонтировании компонента
         return () => {
             console.log('Cleaning up socket listeners...');
-            socket.off('server-message-sent', messageListener);
+            socket.off('new-message-sent', messageListener);
             socket.off('initial-messages', initialMessagesListener);
             socket.off('connect');
             socket.off('connect_error');
