@@ -1,55 +1,31 @@
 import './App.css'
 import {useEffect, useRef, useState} from "react";
-import {io, Socket} from "socket.io-client"
-
-// Типизируем объекты для большей надежности
-type UserType = {
-    id: string;
-    name: string;
-}
-
-type MessageType = {
-    id: string;
-    message: string;
-    user: UserType;
-}
+import {createConnection, destroyConnection, setClientMessage, setClientName} from "./state/chat-reducer.ts";
+import {useAppDispatch, useAppSelector} from "./state/hooks.ts";
 
 // https://my-socket-chat-training-server.onrender.com/
 // Общедоступный сервер
 
 // Подключаемся к нашему локальному серверу
-const socket: Socket = io("http://localhost:3001");
-
 // const socket: Socket = io("https://my-socket-chat-training-server.onrender.com");
 
 function App() {
     console.log("app")
-    const [messages, setMessages] = useState<MessageType[]>([]);
+    // const [messages, setMessages] = useState<MessageType[]>([]);
     const [name, setName] = useState("Alina");
     const [newMessage, setNewMessage] = useState('');
     const [isAutoScrollActive, setIsAutoScrollActive] = useState(true);
     const [lastScrollTop, setLastScrollTop] = useState(0);
 
+    const messages = useAppSelector((state) => state.chat.messages)
+    const dispatch = useAppDispatch()
+    console.log(messages)
+
     useEffect(() => {
-
-        // Слушаем событие 'server-message-sent' от сервера
-        const messageListener = (message: MessageType) => {
-            setMessages((prevMessages) => [...prevMessages, message]);
-        };
-        socket.on('new-message-sent', messageListener);
-
-        const initialMessagesListener = (messages: MessageType[]) => {
-            setMessages(messages);
-        };
-        socket.on('initial-messages', initialMessagesListener);
-
-        // Очистка при размонтировании компонента
+        console.log('Creating connection...');
+        dispatch(createConnection());
         return () => {
-            console.log('Cleaning up socket listeners...');
-            socket.off('new-message-sent', messageListener);
-            socket.off('initial-messages', initialMessagesListener);
-            socket.off('connect');
-            socket.off('connect_error');
+            dispatch(destroyConnection())
         }
     }, []);
 
@@ -61,9 +37,8 @@ function App() {
 
     const sendMessage = () => {
         if (newMessage.trim() !== '') {
-
-            // Отправляем событие 'client-message-sent' на сервер
-            socket.emit('client-message-sent', newMessage);
+            console.log('Client sending message:', newMessage);
+            dispatch(setClientMessage(newMessage));
             setNewMessage('');
         } else {
             console.log('Empty message, not sending');
@@ -108,7 +83,7 @@ function App() {
                         onChange={(e) => setName(e.target.value)}
                     />
                     <button onClick={() => {
-                        socket.emit('client-name-sent', name)
+                        dispatch(setClientName(name));
                     }}>send name
                     </button>
                 </div>
