@@ -1,23 +1,23 @@
 import express from 'express';
 import cors from 'cors';
 import http from 'http';
-import { Server } from "socket.io";
+import {Server} from "socket.io";
 
 const messages = [
     {
         id: "1",
         message: "Hello everyone!",
-        user: { id: "user1", name: "Alice" }
+        user: {id: "user1", name: "Alice"}
     },
     {
         id: "2",
         message: "Hi there!",
-        user: { id: "user2", name: "Bob" }
+        user: {id: "user2", name: "Bob"}
     },
     {
         id: "3",
         message: "Alina is awesome!",
-        user: { id: "user3", name: "Alex" }
+        user: {id: "user3", name: "Alex"}
     },
 ];
 
@@ -57,16 +57,17 @@ io.on('connection', (socketChannel) => {
     })
 
     socketChannel.on("user-typing", () => {
-        socketChannel.emit('user-typing', usersState.get(socketChannel));
+        socketChannel.broadcast.emit('user-typing', usersState.get(socketChannel));
     })
 
     // Отправляем историю сообщений новому пользователю
     socketChannel.emit('initial-messages', messages);
 
-    socketChannel.on('client-message-sent', (newMessage) => {
-       if (typeof newMessage !== "string") {
-           return
-       }
+    socketChannel.on('client-message-sent', (newMessage, successFn) => {
+        if (typeof newMessage !== "string" || newMessage.length > 20) {
+            successFn("Message length should be less than 20 symbol")
+            return
+        }
 
         const user = usersState.get(socketChannel)
 
@@ -79,7 +80,10 @@ io.on('connection', (socketChannel) => {
         messages.push(messageToSend);
         // Пересылаем сообщение всем подключенным клиентам, включая отправителя
         io.emit('new-message-sent', messageToSend);
+        successFn(null)
+
     });
+
 
 });
 
