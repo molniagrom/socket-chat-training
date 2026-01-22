@@ -1,6 +1,12 @@
 import './App.css'
 import {useEffect, useRef, useState} from "react";
-import {createConnection, destroyConnection, setClientMessage, setClientName} from "./state/chat-reducer.ts";
+import {
+    createConnection,
+    destroyConnection,
+    setClientMessage,
+    setClientName,
+    typeMessage
+} from "./state/chat-reducer.ts";
 import {useAppDispatch, useAppSelector} from "./state/hooks.ts";
 
 // https://my-socket-chat-training-server.onrender.com/
@@ -18,6 +24,7 @@ function App() {
     const [lastScrollTop, setLastScrollTop] = useState(0);
 
     const messages = useAppSelector((state) => state.chat.messages)
+    const typingUsers = useAppSelector((state) => state.chat.typingUsers)
     const dispatch = useAppDispatch()
     console.log(messages)
 
@@ -72,6 +79,14 @@ function App() {
                             </div>
                         )
                     })}
+                    {typingUsers.map(u => {
+                        return (
+                            <div key={u.id}>
+                                <b>{u.name}:</b> ...
+                                <hr/>
+                            </div>
+                        )
+                    })}
                     <div ref={messagesAnchorRef}></div>
                 </div>
                 <br/>
@@ -89,6 +104,9 @@ function App() {
                 <br/>
                 <div className={"inputButton"}>
                     <textarea
+                        onKeyPress={() => {
+                            dispatch(typeMessage())
+                        }}
                         className={"textarea"}
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.currentTarget.value)}

@@ -56,6 +56,10 @@ io.on('connection', (socketChannel) => {
         user.name = name
     })
 
+    socketChannel.on("user-typing", () => {
+        socketChannel.emit('user-typing', usersState.get(socketChannel));
+    })
+
     // Отправляем историю сообщений новому пользователю
     socketChannel.emit('initial-messages', messages);
 

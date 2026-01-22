@@ -14,9 +14,14 @@ export const api = {
         this.socket = null;
     },
 
-    subscribe(initialMessagesListener: (messages: MessageType[]) => void, messageListener: (message: MessageType) => void) {
+    subscribe(initialMessagesListener: (
+                  messages: MessageType[]) => void,
+              messageListener: (message: MessageType) => void,
+              userTypingHandler: (user: any) => void
+    ) {
         this.socket?.on('new-message-sent', messageListener);
         this.socket?.on('initial-messages', initialMessagesListener);
+        this.socket?.on('user-typing', userTypingHandler);
     },
 
     sendName(name: string) {
@@ -25,4 +30,7 @@ export const api = {
     sendMessage(message: string) {
         this.socket?.emit('client-message-sent', message);
     },
+    typeMessage() {
+        this.socket?.emit('user-typing');
+    }
 }
