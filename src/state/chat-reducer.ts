@@ -50,13 +50,13 @@ export const createConnection = () => (dispatch: any) => {
     )
 }
 
-export const destroyConnection = () => (dispatch: any) => {
+export const destroyConnection = () => () => {
     api.destroyConnection()
 }
-export const setClientName = (name: string) => (dispatch: any) => {
+export const setClientName = (name: string) => () => {
     api.sendName(name)
 }
-export const setClientMessage = (message: string) => (dispatch: any) => {
+export const setClientMessage = (message: string) => () => {
     api.sendMessage(message);
 }
 

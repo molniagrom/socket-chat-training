@@ -22,7 +22,6 @@ function App() {
     console.log(messages)
 
     useEffect(() => {
-        console.log('Creating connection...');
         dispatch(createConnection());
         return () => {
             dispatch(destroyConnection())
